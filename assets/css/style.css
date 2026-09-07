@@ -49,6 +49,26 @@ a{ color:inherit; text-decoration:none; }
 .mm-burger:hover span{ background:#CC2229 !important; }
 .mm-xc:hover > div,.mm-xc:hover span{ opacity:0.55; }
 
+/* ===== film player (Honda case): clean poster state, native controls on play ===== */
+.mm-film-play{
+  position:absolute; inset:0; width:100%; height:100%; border:0; margin:0; padding:0;
+  background:transparent; cursor:pointer; display:flex; align-items:center; justify-content:center;
+  transition:background .3s ease;
+}
+.mm-film-play:hover{ background:rgba(0,0,0,0.12); }
+.mm-film-tri{
+  width:clamp(64px,7vw,104px); height:clamp(64px,7vw,104px); border-radius:50%;
+  background:rgba(0,0,0,0.55); position:relative; transition:background .25s ease, transform .25s ease;
+  -webkit-backdrop-filter:blur(2px); backdrop-filter:blur(2px);
+}
+.mm-film-play:hover .mm-film-tri{ background:#CC2229; transform:scale(1.06); }
+.mm-film-tri::after{
+  content:""; position:absolute; top:50%; left:52%; transform:translate(-50%,-50%);
+  border-style:solid; border-width:clamp(11px,1.1vw,16px) 0 clamp(11px,1.1vw,16px) clamp(18px,1.9vw,26px);
+  border-color:transparent transparent transparent #FFFFFF;
+}
+.mm-film.is-playing .mm-film-play{ display:none; }
+
 /* ===== menu overlay open/close + scroll lock ===== */
 .mm-menu{ display:none; }
 .mm-menu.is-open{ display:flex; }

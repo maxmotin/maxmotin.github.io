@@ -61,6 +61,21 @@
   }
   Array.prototype.forEach.call(document.querySelectorAll('video[data-autoplay]'), autoplay);
 
+  /* ---- film player (Honda case): custom poster/play overlay, then native controls ---- */
+  Array.prototype.forEach.call(document.querySelectorAll('.mm-film'), function (film) {
+    var v = film.querySelector('video');
+    var btn = film.querySelector('.mm-film-play');
+    if (!v || !btn) return;
+    btn.addEventListener('click', function () {
+      film.classList.add('is-playing');
+      v.controls = true;              // native controls only once the film starts
+      var p = v.play();
+      if (p && p.catch) p.catch(function () {});
+    });
+    // if playback starts by any means, drop the overlay + show controls
+    v.addEventListener('play', function () { film.classList.add('is-playing'); v.controls = true; });
+  });
+
   /* ---- contact backdrop: pick ONE of three at random per load, loop it ---- */
   var cv = document.querySelector('video[data-contact]');
   if (cv) {
