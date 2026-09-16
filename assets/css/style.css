@@ -72,9 +72,11 @@ a{ color:inherit; text-decoration:none; }
 /* ===== home "Selected Work" grid: 1 → 2 → 3 columns as the viewport widens.
    Because zooming out enlarges the CSS-px viewport, the layout reflows into more
    columns on zoom-out too (not just the type shrinking). Capped at 3. ===== */
-.mm-home-grid{ display:grid; grid-template-columns:1fr; gap:clamp(40px,5vw,72px) clamp(28px,3vw,48px); }
-@media (min-width:720px){ .mm-home-grid{ grid-template-columns:1fr 1fr; } }
-@media (min-width:1080px){ .mm-home-grid{ grid-template-columns:1fr 1fr 1fr; } }
+.mm-home-grid{ display:grid; grid-template-columns:minmax(0,1fr); gap:clamp(40px,5vw,72px) clamp(28px,3vw,48px); }
+@media (min-width:720px){ .mm-home-grid{ grid-template-columns:minmax(0,1fr) minmax(0,1fr); } }
+@media (min-width:1080px){ .mm-home-grid{ grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr); } }
+/* never let a long title word push a card past its column */
+.mm-home-grid .mm-ttl{ overflow-wrap:anywhere; }
 
 /* ===== menu overlay open/close + scroll lock ===== */
 .mm-menu{ display:none; }
