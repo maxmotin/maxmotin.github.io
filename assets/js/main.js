@@ -45,34 +45,46 @@
     if (e.key === 'Escape' || e.keyCode === 27) closeMenu();
   });
 
-  /* ---- muted, looping autoplay (Safari/iOS friendly) ---- */
-  function autoplay(v) {
+  /* ---- muted, looping videos: play/pause purely by viewport visibility,
+         so nothing autoplays off-screen at page load (Safari/iOS friendly) ---- */
+  function prep(v) {
     v.muted = true; v.defaultMuted = true; v.loop = true; v.playsInline = true;
     v.setAttribute('muted', ''); v.setAttribute('playsinline', '');
-    var go = function () { var p = v.play(); if (p && p.catch) p.catch(function () {}); };
-    go();
-    v.addEventListener('canplay', go, { once: true });
-    v.addEventListener('loadeddata', go, { once: true });
-    // Fallback for strict autoplay / Low Power Mode: start on the first user interaction.
-    var kick = function () { go(); };
-    ['touchstart', 'pointerdown', 'click', 'scroll', 'keydown'].forEach(function (ev) {
-      window.addEventListener(ev, kick, { once: true, passive: true });
-    });
   }
-  Array.prototype.forEach.call(document.querySelectorAll('video[data-autoplay]'), autoplay);
+  function play(v) { var p = v.play(); if (p && p.catch) p.catch(function () {}); }
 
-  /* pause looping backdrops while off-screen, resume when scrolled into view
-     (so several autoplay videos on one page don't all decode at once) */
+  var autoVids = document.querySelectorAll('video[data-autoplay]');
+  Array.prototype.forEach.call(autoVids, prep);
   if ('IntersectionObserver' in window) {
     var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (e) {
-        var v = e.target;
-        if (e.isIntersecting) { var p = v.play(); if (p && p.catch) p.catch(function () {}); }
-        else { v.pause(); }
-      });
+      entries.forEach(function (e) { if (e.isIntersecting) play(e.target); else e.target.pause(); });
     }, { threshold: 0.2 });
-    Array.prototype.forEach.call(document.querySelectorAll('video[data-autoplay]'), function (v) { io.observe(v); });
+    Array.prototype.forEach.call(autoVids, function (v) { io.observe(v); });
+  } else {
+    Array.prototype.forEach.call(autoVids, play);
   }
+  // Safari Low-Power / strict autoplay: on first interaction, (re)start any in-view video
+  var kicked = false;
+  function kick() {
+    if (kicked) return; kicked = true;
+    var vh = window.innerHeight || 800;
+    Array.prototype.forEach.call(autoVids, function (v) {
+      var r = v.getBoundingClientRect();
+      if (r.bottom > 0 && r.top < vh) play(v);
+    });
+  }
+  ['touchstart', 'pointerdown', 'click', 'scroll', 'keydown'].forEach(function (ev) {
+    window.addEventListener(ev, kick, { once: true, passive: true });
+  });
+
+  /* ---- hover-to-play thumbnails (desktop): poster at rest, play on card hover;
+         touch devices have no hover, so they just keep the still poster ---- */
+  Array.prototype.forEach.call(document.querySelectorAll('video[data-hover]'), function (v) {
+    prep(v);
+    var card = v.closest('a') || v.parentElement;
+    card.addEventListener('mouseenter', function () { try { v.currentTime = 0; } catch (e) {} v.style.opacity = '1'; play(v); });
+    card.addEventListener('mouseleave', function () { v.style.opacity = '0'; v.pause(); });
+  });
 
   /* ---- film player (Honda case): custom poster/play overlay, then native controls ---- */
   Array.prototype.forEach.call(document.querySelectorAll('.mm-film'), function (film) {
