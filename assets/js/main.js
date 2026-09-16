@@ -61,6 +61,19 @@
   }
   Array.prototype.forEach.call(document.querySelectorAll('video[data-autoplay]'), autoplay);
 
+  /* pause looping backdrops while off-screen, resume when scrolled into view
+     (so several autoplay videos on one page don't all decode at once) */
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        var v = e.target;
+        if (e.isIntersecting) { var p = v.play(); if (p && p.catch) p.catch(function () {}); }
+        else { v.pause(); }
+      });
+    }, { threshold: 0.2 });
+    Array.prototype.forEach.call(document.querySelectorAll('video[data-autoplay]'), function (v) { io.observe(v); });
+  }
+
   /* ---- film player (Honda case): custom poster/play overlay, then native controls ---- */
   Array.prototype.forEach.call(document.querySelectorAll('.mm-film'), function (film) {
     var v = film.querySelector('video');
