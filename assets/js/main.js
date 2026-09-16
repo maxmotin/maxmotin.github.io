@@ -109,6 +109,8 @@
     cv.muted = true; cv.defaultMuted = true; cv.playsInline = true; // set BEFORE src for Safari
     cv.src = list[Math.floor(Math.random() * list.length)];
     cv.load();
-    autoplay(cv);
+    prep(cv);
+    play(cv);
+    cv.addEventListener('canplay', function () { play(cv); }, { once: true });
   }
 })();
